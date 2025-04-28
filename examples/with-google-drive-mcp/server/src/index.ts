@@ -25,7 +25,7 @@ const composioToolset = new OpenAIToolSet();
 // --- Route Handlers ---
 
 // Handler for the root route
-const handleRoot = (c: Context) => c.text("Hello Hono!");
+const handleRoot = (c: Context) => c.text("Hello from VoltAgent!");
 
 // Handler for the login route
 const handleLogin = async (c: Context) => {
