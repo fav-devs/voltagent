@@ -2,8 +2,8 @@
 title: "Building a Google Drive Chatbot with VoltAgent & Composio MCP"
 description: A tutorial on how to build a Google Drive chatbot using VoltAgent and Composio.
 tags: [mcp, tutorial]
-slug: building-google-drive-chatbot
-image: https://cdn.voltagent.dev/2025-04-27-ai-agents-frameworks/social.png
+slug: building-google-drive-chatbot-with-composio-mcp
+image: https://cdn.voltagent.dev/2025-04-28-building-google-drive-chatbot/social.png
 authors: omeraplak
 ---
 
