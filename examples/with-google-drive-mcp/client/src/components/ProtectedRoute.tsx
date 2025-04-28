@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { Navigate, useNavigate } from "react-router";
+import { useAuth } from "../context/AuthContext";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -7,15 +8,17 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
-
-  // Check for authentication
-  const isAuthenticated = localStorage.getItem("chatUserId") !== null;
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       navigate("/login");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isLoading, navigate]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
