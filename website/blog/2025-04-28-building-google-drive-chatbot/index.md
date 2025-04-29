@@ -1,6 +1,6 @@
 ---
-title: "Building a Google Drive Chatbot with VoltAgent & Composio MCP"
-description: A tutorial on how to build a Google Drive chatbot using VoltAgent and Composio.
+title: Building a Google Drive Chatbot with VoltAgent & Composio MCP
+description: A guide to implementing a Google Drive chatbot using VoltAgent framework and Composio MCP integration.
 tags: [mcp, tutorial]
 slug: building-google-drive-chatbot-with-composio-mcp
 image: https://cdn.voltagent.dev/2025-04-28-building-google-drive-chatbot/social.png
@@ -9,54 +9,71 @@ authors: omeraplak
 
 import GitHubExampleLink from '@site/src/components/blog-widgets/GitHubExampleLink';
 
-Hey everyone! We're excited to share something cool we've put together: a chatbot that can actually search through your Google Drive files. To build this, we used our own framework, VoltAgent, along with some neat tools like [Composio](https://composio.dev/) and the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction). If those names sound a bit technical, no worries, we'll explain everything as we go.
+## Introduction
 
-## What's the Goal Here?
+We're excited to share something cool we've put together: a chatbot that can actually search through your Google Drive files.
 
-Imagine asking a chatbot, `Find my presentation about Q3 results,` and _bam_, it digs through your Google Drive and gives you the link. That's exactly the kind of thing we wanted to enable an AI agent that can securely connect to your personal tools, like Google Drive in this case.
+To build this we'll use [VoltAgent](https://github.com/VoltAgent/voltagent), along with some neat tools like [Composio](https://composio.dev/) and the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction). If those names sound a bit technical, no worries, we'll explain everything as we go.
+
+:::note What's the Goal Here?
+Imagine asking a chatbot, `Find my presentation about Q3 results,` and _bam_, it digs through your Google Drive and gives you the link.
+
+That's exactly the kind of thing we wanted to enable an AI agent that can securely connect to your personal tools, like Google Drive in this case.
+:::
 
 ![Google Drive Chatbot](https://cdn.voltagent.dev/2025-04-28-building-google-drive-chatbot/google-drive-composio-demo.gif)
-
-## The Key Ingredients
-
-To make this chatbot work, we needed a few essential pieces:
-
-### 1. VoltAgent: Our Agent Framework
-
-So, first things first: VoltAgent. This is our baby an open-source TypeScript framework we built specifically to make creating AI agents less painful. We've all been there, trying to cobble together different AI models, memory systems, and tool connections. It gets messy fast!
-
-VoltAgent provides a structured way to do this. We designed it to be modular, so you can easily swap AI models (like GPT-4), manage how the agent remembers things, and crucially for this example hook up external tools and data sources, like Google Drive. Our goal was to help developers (including ourselves!) build sophisticated agents faster while keeping the codebase clean and maintainable.
-
-### 2. Composio: The Secure Bridge for Tools
-
-Now, how does our VoltAgent-powered agent actually _talk_ to Google Drive? We needed a secure and straightforward way to handle that connection. Wrestling with Google's APIs and authentication flows directly can be time-consuming.
-
-This is where we decided to use Composio. They offer ready-made, secure connections to a _ton_ of applications ([hundreds, actually!](https://mcp.composio.dev/)), including the [Google Drive](https://mcp.composio.dev/googledrive) integration we needed. Instead of us building and maintaining the whole OAuth dance and API logic, Composio provides a secure "bridge" or tool that our agent can use. And the way it provides this tool is through a standard called MCP.
-
-### 3. MCP (Model Context Protocol): A Common Language for Agents and Tools
-
-Think of MCP as a universal translator. It's a standardized way for AI agents (like those built with VoltAgent) and external tools (like the Google Drive connection from Composio) to communicate securely and effectively.
-
-We made sure VoltAgent understands MCP precisely because it simplifies integrations so much. Composio's tool speaks MCP, VoltAgent speaks MCP, and _boom_ they can talk to each other without us needing to write a bunch of custom glue code. It's like having standard USB ports for AI tools. Composio conveniently hosts these MCP connection points (called "servers" or "endpoints"), so we didn't even need to worry about running or deploying that part ourselves.
-
-**The TL;DR:**
-
-- **VoltAgent:** Our framework for building the agent's logic.
-- **Composio:** Provides the pre-built, secure Google Drive tool.
-- **MCP:** The standard protocol that lets VoltAgent use Composio's tool easily.
-
-## Let's Get it Running!
-
-The best part? We packaged this whole setup into an example template, so you can try it out with just one command. No need to build it all from scratch.
-
-**Step 1: Grab the Example Code**
-
-Pop open your terminal and run this:
 
 <GitHubExampleLink
   repoUrl="https://github.com/VoltAgent/voltagent/tree/main/examples/with-google-drive-mcp"
   npmCommand="npm create voltagent-app@latest -- --example with-google-drive-mcp"
 />
+
+## The Tools We Need
+
+To make this chatbot work, we needed a few essential pieces:
+
+### 1. VoltAgent: Our Agent Framework
+
+So, first things first: [VoltAgent](https://github.com/VoltAgent/voltagent). This is our baby, an open-source TypeScript framework we built specifically to make creating AI agents less painful. We've all been there, trying to cobble together different AI models, memory systems, and tool connections. It gets messy fast!
+
+VoltAgent provides a structured way to do this. We designed it to be modular, so you can easily swap AI models (like GPT-4), manage how the agent remembers things, and crucially for this example hook up external tools and data sources, like Google Drive.
+
+Our goal was to help developers (including ourselves!) build sophisticated agents faster while keeping the codebase clean and maintainable.
+
+### 2. Composio: The Secure Bridge for Tools
+
+Now, how does our VoltAgent-powered agent actually _talk_ to Google Drive? We needed a secure and straightforward way to handle that connection. Wrestling with Google's APIs and authentication flows directly can be time-consuming.
+
+This is where we decided to use [Composio](https://composio.dev/). They offer ready-made, secure connections to a _ton_ of applications ([hundreds, actually!](https://mcp.composio.dev/)), including the [Google Drive](https://mcp.composio.dev/googledrive) integration we needed.
+
+Instead of us building and maintaining the whole OAuth dance and API logic, Composio provides a secure "bridge" or tool that our agent can use. And the way it provides this tool is through a standard called MCP.
+
+### 3. MCP (Model Context Protocol): A Common Language for Agents and Tools
+
+Think of MCP as a universal translator. It's a standardized way for AI agents (like those built with VoltAgent) and external tools (like the Google Drive connection from Composio) to communicate securely and effectively.
+
+We made sure VoltAgent understands MCP precisely because it simplifies integrations so much. Composio's tool speaks MCP, VoltAgent speaks MCP, and _boom_ they can talk to each other without us needing to write a bunch of custom glue code.
+
+It's like having standard USB ports for AI tools. Composio conveniently hosts these MCP connection points (called "servers" or "endpoints"), so we didn't even need to worry about running or deploying that part ourselves.
+
+:::tip **The TL;DR:**
+
+- **VoltAgent:** Our framework for building the agent's logic.
+- **Composio:** Provides the pre-built, secure Google Drive tool.
+- **MCP:** The standard protocol that lets VoltAgent use Composio's tool easily.
+  :::
+
+## Let's Get it Running!
+
+The best part? We've packaged everything into a ready-to-use template, no need to start from scratch. Since we'll be sharing many VoltAgent tutorials, in this post we'll focus on an example MCP integration rather than walking through a full VoltAgent setup.
+
+**Step 1: Grab the Example Code**
+
+Pop open your terminal and run this:
+
+```
+npm create voltagent-app@latest -- --example with-google-drive-mcp
+```
 
 This command uses our `create-voltagent-app` tool to fetch the complete project code.
 
