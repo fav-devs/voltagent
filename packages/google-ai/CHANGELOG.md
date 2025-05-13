@@ -1,5 +1,13 @@
 # @voltagent/google-ai
 
+## 0.3.8
+
+### Patch Changes
+
+- [#122](https://github.com/VoltAgent/voltagent/pull/122) [`de83eaf`](https://github.com/VoltAgent/voltagent/commit/de83eaf76af5b88fb4303ff60fd8af36369fda63) Thanks [@luixaviles](https://github.com/luixaviles)! - feat(google-ai): include tool calls and results in generateText response
+
+  Fixes #115
+
 ## 0.3.7
 
 ### Patch Changes
