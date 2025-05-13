@@ -6,28 +6,24 @@ This example demonstrates how to use custom endpoints with VoltAgent. It include
 2. **Standalone Application**: A complete standalone application with custom endpoints.
 3. **Express Integration**: An example of integrating VoltAgent with an Express application.
 
-## Getting Started
+## Running the Examples
 
-### Installation
+To run these examples, you'll need to build the VoltAgent core package first:
 
 ```bash
-npm install
-# or
-yarn install
-# or
-pnpm install
+# From the root of the VoltAgent repository
+cd packages/core && npm run build
 ```
 
-### Running the Examples
-
-#### Basic Custom Endpoints
+Then, you can run the examples using tsx:
 
 ```bash
-npm run start:basic
+# From the examples/with-custom-endpoints directory
+npx tsx custom-endpoints.ts
 # or
-yarn start:basic
+npx tsx standalone-custom-endpoints.ts
 # or
-pnpm start:basic
+npx tsx express-integration.ts
 ```
 
 This will start a VoltAgent server with custom endpoints. Once the server is running, you can test the endpoints with the following curl commands:
@@ -46,27 +42,13 @@ curl -X POST -H "Content-Type: application/json" -d '{"input":"What is the weath
 curl http://localhost:3141/custom/late-addition
 ```
 
-#### Standalone Application
+### Testing the Endpoints
 
-```bash
-npm run start:standalone
-# or
-yarn start:standalone
-# or
-pnpm start:standalone
-```
+When running the standalone example or the Express integration example, you can test the endpoints with the same curl commands as above.
 
-This will start a standalone application with custom endpoints. Once the server is running, you can test the endpoints with the same curl commands as above.
+### Express Integration
 
-#### Express Integration
-
-```bash
-npm run start:express
-# or
-yarn start:express
-# or
-pnpm start:express
-```
+When running the Express integration example, you'll have both an Express server and a VoltAgent server running:
 
 This will start an Express application on port 3000 and a VoltAgent server on port 3141. Once the servers are running, you can:
 

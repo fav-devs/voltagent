@@ -4,7 +4,6 @@ import { AgentRegistry } from "./server/registry";
 import { checkForUpdates } from "./utils/update";
 import { registerCustomEndpoint, registerCustomEndpoints } from "./server/api";
 import type { CustomEndpointDefinition } from "./server/custom-endpoints";
-import { CustomEndpointError } from "./server/custom-endpoints";
 
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { BatchSpanProcessor, type SpanExporter } from "@opentelemetry/sdk-trace-base";
