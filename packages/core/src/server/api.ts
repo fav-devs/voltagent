@@ -27,8 +27,8 @@ import {
   type TextRequestSchema,
   type ObjectRequestSchema,
 } from "./api.routes";
-import type {
-  CustomEndpointDefinition,
+import type { CustomEndpointDefinition } from "./custom-endpoints";
+import {
   CustomEndpointError,
   validateCustomEndpoint,
   validateCustomEndpoints,
@@ -755,9 +755,6 @@ export function registerCustomEndpoint(endpoint: CustomEndpointDefinition): void
     const validatedEndpoint = validateCustomEndpoint(endpoint);
     const { path, method, handler } = validatedEndpoint;
 
-    // Log the registration
-    console.log(`Registering custom endpoint: ${method.toUpperCase()} ${path}`);
-
     // Register the endpoint with the app
     switch (method) {
       case "get":
@@ -778,12 +775,15 @@ export function registerCustomEndpoint(endpoint: CustomEndpointDefinition): void
       case "options":
         app.options(path, handler);
         break;
-      case "head":
-        app.head(path, handler);
-        break;
       default:
         throw new CustomEndpointError(`Unsupported HTTP method: ${method}`);
     }
+
+    // Store registered endpoint for later display in server startup (accumulate, don't override)
+    if (!(global as any).__voltAgentCustomEndpoints) {
+      (global as any).__voltAgentCustomEndpoints = [];
+    }
+    (global as any).__voltAgentCustomEndpoints.push(validatedEndpoint);
   } catch (error) {
     if (error instanceof CustomEndpointError) {
       throw error;
@@ -804,10 +804,44 @@ export function registerCustomEndpoints(endpoints: CustomEndpointDefinition[]): 
     // Validate all endpoints first
     const validatedEndpoints = validateCustomEndpoints(endpoints);
 
-    // Register each endpoint
-    for (const endpoint of validatedEndpoints) {
-      registerCustomEndpoint(endpoint);
+    if (validatedEndpoints.length === 0) {
+      return;
     }
+
+    // Register each endpoint quietly
+    for (const endpoint of validatedEndpoints) {
+      const { path, method, handler } = endpoint;
+
+      // Register the endpoint with the app (without individual logging)
+      switch (method) {
+        case "get":
+          app.get(path, handler);
+          break;
+        case "post":
+          app.post(path, handler);
+          break;
+        case "put":
+          app.put(path, handler);
+          break;
+        case "patch":
+          app.patch(path, handler);
+          break;
+        case "delete":
+          app.delete(path, handler);
+          break;
+        case "options":
+          app.options(path, handler);
+          break;
+        default:
+          throw new CustomEndpointError(`Unsupported HTTP method: ${method}`);
+      }
+    }
+
+    // Store registered endpoints for later display in server startup (accumulate, don't override)
+    if (!(global as any).__voltAgentCustomEndpoints) {
+      (global as any).__voltAgentCustomEndpoints = [];
+    }
+    (global as any).__voltAgentCustomEndpoints.push(...validatedEndpoints);
   } catch (error) {
     if (error instanceof CustomEndpointError) {
       throw error;

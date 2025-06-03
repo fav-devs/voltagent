@@ -1,70 +1,96 @@
 # VoltAgent Custom Endpoints Example
 
-This example demonstrates how to use custom endpoints with VoltAgent. It includes three different approaches:
+This example shows how to create custom API endpoints with VoltAgent using **two different registration methods**.
 
-1. **Basic Custom Endpoints**: A simple example of adding custom endpoints to VoltAgent.
-2. **Standalone Application**: A complete standalone application with custom endpoints.
-3. **Express Integration**: An example of integrating VoltAgent with an Express application.
+## Features
 
-## Running the Examples
+This example includes 4 simple endpoints:
 
-To run these examples, you'll need to build the VoltAgent core package first:
+- `GET /api/health` - Health check (registered via function call)
+- `GET /api/hello/:name` - Personalized greeting (registered via function call)
+- `POST /api/calculate` - Simple calculator (registered via constructor)
+- `DELETE /api/delete-all` - Delete all data (registered via constructor)
 
-```bash
-# From the root of the VoltAgent repository
-cd packages/core && npm run build
+## Registration Methods
+
+### Method 1: Function Call Registration
+
+```typescript
+registerCustomEndpoints(endpoints);
 ```
 
-Then, you can run the examples using tsx:
+- Useful when you want to register endpoints before creating VoltAgent
+- Good for conditional endpoint registration
+- Can be called multiple times
 
-```bash
-# From the examples/with-custom-endpoints directory
-npx tsx custom-endpoints.ts
-# or
-npx tsx standalone-custom-endpoints.ts
-# or
-npx tsx express-integration.ts
+### Method 2: Constructor Registration
+
+```typescript
+new VoltAgent({
+  agents: { agent },
+  customEndpoints: endpoints,
+});
 ```
 
-This will start a VoltAgent server with custom endpoints. Once the server is running, you can test the endpoints with the following curl commands:
+- Most common and convenient method
+- Register endpoints when creating VoltAgent instance
+
+### Using Both Methods
+
+Both methods work together! You can use them simultaneously and all endpoints will be properly registered and displayed in the server startup banner.
+
+## Setup
+
+1. Install dependencies:
 
 ```bash
-# Test the hello endpoint
-curl http://localhost:3141/custom/hello
-
-# Test the echo endpoint
-curl -X POST -H "Content-Type: application/json" -d '{"message":"Hello World"}' http://localhost:3141/custom/echo
-
-# Test the agent proxy endpoint
-curl -X POST -H "Content-Type: application/json" -d '{"input":"What is the weather?"}' http://localhost:3141/custom/agent-proxy
-
-# Test the late-addition endpoint (after 3 seconds)
-curl http://localhost:3141/custom/late-addition
+npm install
 ```
 
-### Testing the Endpoints
+2. Create `.env` file:
 
-When running the standalone example or the Express integration example, you can test the endpoints with the same curl commands as above.
+```bash
+echo "OPENAI_API_KEY=your_api_key_here" > .env
+```
 
-### Express Integration
+## Running
 
-When running the Express integration example, you'll have both an Express server and a VoltAgent server running:
+```bash
+npm run dev
+```
 
-This will start an Express application on port 3000 and a VoltAgent server on port 3141. Once the servers are running, you can:
+## Testing
 
-1. Open http://localhost:3000 in your browser to see the Express application.
-2. Test the Express routes:
-   - http://localhost:3000/api/info
-   - http://localhost:3000/api/time
-3. Test the VoltAgent custom endpoints:
-   - http://localhost:3141/custom/hello
-   - http://localhost:3141/custom/debug
-   - http://localhost:3141/custom/express-proxy
+```bash
+# Health check
+curl http://localhost:3141/api/health
 
-## Learn More
+# Greeting
+curl http://localhost:3141/api/hello/john
 
-To learn more about VoltAgent and custom endpoints, check out the following resources:
+# Calculator
+curl -X POST http://localhost:3141/api/calculate \
+  -H "Content-Type: application/json" \
+  -d '{"a": 10, "b": 5, "operation": "add"}'
 
-- [VoltAgent Documentation](https://voltagent.dev/docs)
-- [Custom Endpoints Documentation](https://voltagent.dev/docs/api/custom-endpoints)
-- [VoltAgent GitHub Repository](https://github.com/VoltAgent/voltagent)
+# Delete all data
+curl -X DELETE http://localhost:3141/api/delete-all
+```
+
+## Chat with Agent
+
+```bash
+curl -X POST http://localhost:3141/agents/agent/text \
+  -H "Content-Type: application/json" \
+  -d '{"input": "What endpoints are available?"}'
+```
+
+## How it Works
+
+1. **Method 1**: Use `registerCustomEndpoints(endpoints)` to register endpoints via function call
+2. **Method 2**: Pass `customEndpoints` array to VoltAgent constructor
+3. Both methods can be used together - all endpoints will be registered
+4. Each endpoint contains a `path`, `method`, and `handler`
+5. The handler function receives the HTTP request and returns a response
+
+That's it! 🎉

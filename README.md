@@ -108,26 +108,11 @@ const agent = new Agent({
   model: openai("gpt-4o-mini"),
 });
 
-// Define custom API endpoints (optional)
-const customEndpoints = [
-  {
-    path: "/custom/hello",
-    method: "get",
-    handler: (c) => {
-      return c.json({
-        success: true,
-        message: "Hello from custom endpoint!",
-      });
-    },
-  },
-];
-
 // Initialize VoltAgent with your agent(s) and custom endpoints
 new VoltAgent({
   agents: {
     agent,
   },
-  customEndpoints, // Optional: Add custom endpoints to the API server
 });
 ```
 

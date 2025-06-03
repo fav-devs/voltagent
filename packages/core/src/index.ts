@@ -36,6 +36,7 @@ export * from "./utils";
 export * from "./retriever";
 export * from "./mcp";
 export { AgentRegistry } from "./server/registry";
+export { registerCustomEndpoint, registerCustomEndpoints } from "./server/api";
 export * from "./utils/update";
 export * from "./voice";
 export {
