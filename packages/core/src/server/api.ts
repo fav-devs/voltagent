@@ -1,8 +1,7 @@
-import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { WebSocketServer } from "ws";
 import type { WebSocket } from "ws";
-import { z } from "zod";
+import type { z } from "zod";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
 import type { AgentHistoryEntry } from "../agent/history";
@@ -25,16 +24,16 @@ import {
   type ErrorSchema,
   type TextResponseSchema,
   type ObjectResponseSchema,
-  type AgentResponseSchema,
   type TextRequestSchema,
   type ObjectRequestSchema,
 } from "./api.routes";
-import {
+import type {
   CustomEndpointDefinition,
   CustomEndpointError,
   validateCustomEndpoint,
   validateCustomEndpoints,
 } from "./custom-endpoints";
+import { convertJsonSchemaToZod } from "zod-from-json-schema";
 
 const app = new OpenAPIHono();
 
@@ -179,7 +178,7 @@ app.openapi(getAgentsRoute, (c) => {
       data: agentDataArray as SuccessResponse["data"], // Ensure data array matches schema
     };
 
-    return c.json(response);
+    return c.json(response, 200);
   } catch (error) {
     console.error("Failed to get agents:", error);
     return c.json(
@@ -274,7 +273,10 @@ app.openapi(textRoute, async (c) => {
     const { input, options = {} } = c.req.valid("json") as z.infer<typeof TextRequestSchema>;
 
     const response = await agent.generateText(input, options);
-    return c.json({ success: true, data: response } satisfies z.infer<typeof TextResponseSchema>);
+    return c.json(
+      { success: true, data: response } satisfies z.infer<typeof TextResponseSchema>,
+      200,
+    );
   } catch (error) {
     return c.json(
       {
@@ -311,48 +313,110 @@ app.openapi(streamRoute, async (c) => {
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          // Create a flag to track if stream has been closed
+          let streamClosed = false;
+
+          // Helper function to safely enqueue data
+          const safeEnqueue = (data: string) => {
+            if (!streamClosed) {
+              try {
+                controller.enqueue(new TextEncoder().encode(data));
+              } catch (e) {
+                console.error("Failed to enqueue data:", e);
+                streamClosed = true;
+              }
+            }
+          };
+
+          // Helper function to safely close stream
+          const safeClose = () => {
+            if (!streamClosed) {
+              try {
+                controller.close();
+                streamClosed = true;
+              } catch (e) {
+                console.error("Failed to close controller:", e);
+              }
+            }
+          };
+
           const response = await agent.streamText(input, {
             ...options,
             provider: {
               maxTokens: options.maxTokens,
               temperature: options.temperature,
+              // Add onError callback to handle streaming errors
+              onError: async (error: any) => {
+                const errorData = {
+                  error: error?.message ?? "Streaming failed",
+                  timestamp: new Date().toISOString(),
+                  type: "error",
+                  code: error.code || "STREAM_ERROR",
+                };
+                const errorMessage = `data: ${JSON.stringify(errorData)}\n\n`;
+                safeEnqueue(errorMessage);
+                safeClose();
+              },
             },
           });
 
-          for await (const chunk of response.textStream) {
-            const data = {
-              text: chunk,
-              timestamp: new Date().toISOString(),
-              type: "text",
-            };
-            const sseMessage = `data: ${JSON.stringify(data)}\n\n`;
-            controller.enqueue(new TextEncoder().encode(sseMessage));
-          }
+          // Iterate through the text stream
+          try {
+            for await (const chunk of response.textStream) {
+              if (streamClosed) break;
 
-          const completionData = {
-            done: true,
-            timestamp: new Date().toISOString(),
-            type: "completion",
-          };
-          const completionMessage = `data: ${JSON.stringify(completionData)}\n\n`;
-          controller.enqueue(new TextEncoder().encode(completionMessage));
-          controller.close();
+              const data = {
+                text: chunk,
+                timestamp: new Date().toISOString(),
+                type: "text",
+              };
+              const sseMessage = `data: ${JSON.stringify(data)}\n\n`;
+              safeEnqueue(sseMessage);
+            }
+
+            // Send completion message if stream completed successfully
+            if (!streamClosed) {
+              const completionData = {
+                done: true,
+                timestamp: new Date().toISOString(),
+                type: "completion",
+              };
+              const completionMessage = `data: ${JSON.stringify(completionData)}\n\n`;
+              safeEnqueue(completionMessage);
+              safeClose();
+            }
+          } catch (iterationError) {
+            // Handle errors during stream iteration
+            console.error("Error during stream iteration:", iterationError);
+            const errorData = {
+              error: (iterationError as Error)?.message ?? "Stream iteration failed",
+              timestamp: new Date().toISOString(),
+              type: "error",
+              code: "ITERATION_ERROR",
+            };
+            const errorMessage = `data: ${JSON.stringify(errorData)}\n\n`;
+            safeEnqueue(errorMessage);
+            safeClose();
+          }
         } catch (error) {
+          // Handle errors during initial setup
+          console.error("Error during stream setup:", error);
           const errorData = {
-            error: error instanceof Error ? error.message : "Streaming failed",
+            error: error instanceof Error ? error.message : "Stream setup failed",
             timestamp: new Date().toISOString(),
             type: "error",
+            code: "SETUP_ERROR",
           };
           const errorMessage = `data: ${JSON.stringify(errorData)}\n\n`;
           try {
             controller.enqueue(new TextEncoder().encode(errorMessage));
           } catch (e) {
-            console.error("Failed to enqueue error message:", e);
+            console.error("Failed to enqueue setup error message:", e);
           }
           try {
             controller.close();
           } catch (e) {
-            console.error("Failed to close controller after error:", e);
+            console.error("Failed to close controller after setup error:", e);
           }
         }
       },
@@ -399,8 +463,13 @@ app.openapi(objectRoute, async (c) => {
       options = {},
     } = c.req.valid("json") as z.infer<typeof ObjectRequestSchema>;
 
-    const response = await agent.generateObject(input, schema, options);
-    return c.json({ success: true, data: response } satisfies z.infer<typeof ObjectResponseSchema>);
+    const schemaInZodObject = convertJsonSchemaToZod(schema) as unknown as z.ZodType;
+
+    const response = await agent.generateObject(input, schemaInZodObject, options);
+    return c.json(
+      { success: true, data: response } satisfies z.infer<typeof ObjectResponseSchema>,
+      200,
+    );
   } catch (error) {
     return c.json(
       {
@@ -432,52 +501,128 @@ app.openapi(streamObjectRoute, async (c) => {
       options = {},
     } = c.req.valid("json") as z.infer<typeof ObjectRequestSchema>;
 
-    const agentStream = await agent.streamObject(input, schema, options);
+    const schemaInZodObject = convertJsonSchemaToZod(schema) as unknown as z.ZodType;
 
     const sseStream = new ReadableStream({
       async start(controller) {
-        const reader = agentStream.getReader();
-        const decoder = new TextDecoder();
-
         try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              const completionData = {
-                done: true,
-                type: "completion",
-                timestamp: new Date().toISOString(),
-              };
-              controller.enqueue(`data: ${JSON.stringify(completionData)}\n\n`);
-              break;
+          // Create a flag to track if stream has been closed
+          let streamClosed = false;
+
+          // Helper function to safely enqueue data
+          const safeEnqueue = (data: string) => {
+            if (!streamClosed) {
+              try {
+                controller.enqueue(new TextEncoder().encode(data));
+              } catch (e) {
+                console.error("Failed to enqueue data:", e);
+                streamClosed = true;
+              }
             }
-            const chunkString = decoder.decode(value, { stream: true });
-            controller.enqueue(`data: ${chunkString}\n\n`);
-          }
-          controller.close();
-        } catch (error) {
-          const errorData = {
-            error: error instanceof Error ? error.message : "Object streaming failed",
-            type: "error",
-            timestamp: new Date().toISOString(),
           };
+
+          // Helper function to safely close stream
+          const safeClose = () => {
+            if (!streamClosed) {
+              try {
+                controller.close();
+                streamClosed = true;
+              } catch (e) {
+                console.error("Failed to close controller:", e);
+              }
+            }
+          };
+
+          const agentStream = await agent.streamObject(input, schemaInZodObject, {
+            ...options,
+            provider: {
+              ...(options as any).provider,
+              // Add onError callback to handle streaming errors
+              onError: async (error: any) => {
+                console.error("Object stream error occurred:", error);
+                const errorData = {
+                  error: error?.message ?? "Object streaming failed",
+                  timestamp: new Date().toISOString(),
+                  type: "error",
+                  code: error.code || "STREAM_ERROR",
+                };
+                const errorMessage = `data: ${JSON.stringify(errorData)}\n\n`;
+                safeEnqueue(errorMessage);
+                safeClose();
+              },
+            },
+          });
+
+          const reader = agentStream.objectStream.getReader();
+
+          // Iterate through the object stream
           try {
-            controller.enqueue(`data: ${JSON.stringify(errorData)}\n\n`);
+            while (true) {
+              if (streamClosed) break;
+
+              const { done, value } = await reader.read();
+              if (done) {
+                // Send completion message if stream completed successfully
+                if (!streamClosed) {
+                  const completionData = {
+                    done: true,
+                    type: "completion",
+                    timestamp: new Date().toISOString(),
+                  };
+                  const completionMessage = `data: ${JSON.stringify(completionData)}\n\n`;
+                  safeEnqueue(completionMessage);
+                  safeClose();
+                }
+                break;
+              }
+              // Since value is already a JavaScript object, we can stringify it directly
+              const objectData = {
+                object: value,
+                timestamp: new Date().toISOString(),
+                type: "object",
+              };
+              const sseMessage = `data: ${JSON.stringify(objectData)}\n\n`;
+              safeEnqueue(sseMessage);
+            }
+          } catch (iterationError) {
+            // Handle errors during stream iteration
+            console.error("Error during object stream iteration:", iterationError);
+            const errorData = {
+              error: (iterationError as Error)?.message ?? "Object stream iteration failed",
+              timestamp: new Date().toISOString(),
+              type: "error",
+              code: "ITERATION_ERROR",
+            };
+            const errorMessage = `data: ${JSON.stringify(errorData)}\n\n`;
+            safeEnqueue(errorMessage);
+            safeClose();
+          } finally {
+            reader.releaseLock();
+          }
+        } catch (error) {
+          // Handle errors during initial setup
+          console.error("Error during object stream setup:", error);
+          const errorData = {
+            error: error instanceof Error ? error.message : "Object stream setup failed",
+            timestamp: new Date().toISOString(),
+            type: "error",
+            code: "SETUP_ERROR",
+          };
+          const errorMessage = `data: ${JSON.stringify(errorData)}\n\n`;
+          try {
+            controller.enqueue(new TextEncoder().encode(errorMessage));
           } catch (e) {
-            console.error("Failed to enqueue error message:", e);
+            console.error("Failed to enqueue setup error message:", e);
           }
           try {
             controller.close();
           } catch (e) {
-            console.error("Failed to close controller after error:", e);
+            console.error("Failed to close controller after setup error:", e);
           }
-        } finally {
-          reader.releaseLock();
         }
       },
       cancel(reason) {
         console.log("Object Stream cancelled:", reason);
-        agentStream.cancel(reason);
       },
     });
 

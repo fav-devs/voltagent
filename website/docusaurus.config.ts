@@ -80,7 +80,20 @@ const config: Config = {
         },
       };
     },
+    // VoltAgent Observability Platform - Separate docs instance
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "observability",
+        path: "observability",
+        routeBasePath: "docs-observability",
+        sidebarPath: "./sidebarsObservability.ts",
+        breadcrumbs: false,
+        sidebarCollapsed: false,
+      },
+    ],
     "./plugins/clarity/index.js",
+    "./plugins/ahrefs/index.js",
     [
       "@docusaurus/plugin-client-redirects",
       {
@@ -88,6 +101,10 @@ const config: Config = {
           {
             to: "/ai-agent-marketplace/",
             from: "/marketplace/",
+          },
+          {
+            to: "/about/",
+            from: "/manifesto/",
           },
         ],
       },
@@ -109,10 +126,25 @@ const config: Config = {
         },
       },
     ],
+    [
+      "./plugins/docusaurus-plugin-content-showcase",
+      {
+        id: "showcase",
+        contentPath: "src/components/showcase",
+      },
+    ],
     "./plugins/gurubase/index.js",
+    [
+      "./plugins/docusaurus-plugin-content-mcp",
+      {
+        id: "mcp",
+        routeBasePath: "mcp",
+        path: "./src/components/mcp-list/data",
+      },
+    ],
   ],
   themeConfig: {
-    image: "img/social.png",
+    image: "img/social2.png",
     colorMode: {
       disableSwitch: true,
       defaultMode: "dark",
@@ -123,8 +155,8 @@ const config: Config = {
       style: "dark",
       items: [
         {
-          to: "/manifesto",
-          label: "Manifesto",
+          to: "/about",
+          label: "About us",
           position: "left",
         },
         {
@@ -133,8 +165,23 @@ const config: Config = {
           position: "left",
         },
         {
+          to: "/docs-observability",
+          label: "Observability",
+          position: "left",
+        },
+        {
+          to: "/showcase",
+          label: "Showcase",
+          position: "left",
+        },
+        {
           to: "/blog",
           label: "Blog",
+          position: "left",
+        },
+        {
+          to: "/mcp",
+          label: "MCP",
           position: "left",
         },
       ],
@@ -234,13 +281,6 @@ const config: Config = {
       },
 
       additionalLanguages: ["diff", "diff-ts", "diff-yml", "bash"],
-    },
-    announcementBar: {
-      id: "product_hunt_support",
-      content:
-        ' <a target="_blank" rel="noopener noreferrer" href="https://github.com/VoltAgent/voltagent/tree/main/examples/">🚀 Refer to 20+ AI Agent Examples with Source Code</a>',
-      backgroundColor: "#10b981",
-      isCloseable: true,
     },
   } satisfies Preset.ThemeConfig,
 };

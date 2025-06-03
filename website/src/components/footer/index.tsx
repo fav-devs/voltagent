@@ -82,6 +82,9 @@ export function Footer() {
               <li>
                 <FooterLink href="/docs/">Docs</FooterLink>
               </li>
+              <li>
+                <FooterLink href="/mcp/">MCP Directory</FooterLink>
+              </li>
             </ul>
           </div>
 
@@ -96,7 +99,10 @@ export function Footer() {
                 </FooterLink>
               </li>
               <li>
-                <FooterLink href="/manifesto/">Manifesto</FooterLink>
+                <FooterLink href="/about/">About us</FooterLink>
+              </li>
+              <li>
+                <FooterLink href="/showcase/">Showcase</FooterLink>
               </li>
             </ul>
           </div>

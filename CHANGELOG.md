@@ -1,5 +1,128 @@
 ## Package: @voltagent/core
 
+## 0.1.23
+
+### Patch Changes
+
+- [`b2f423d`](https://github.com/VoltAgent/voltagent/commit/b2f423d55ee031fc02b0e8eda5175cfe15e38a42) Thanks [@omeraplak](https://github.com/omeraplak)! - fix: zod import issue - #161
+
+  Fixed incorrect zod import that was causing OpenAPI type safety errors. Updated to use proper import from @hono/zod-openapi package.
+
+## 0.1.22
+
+### Patch Changes
+
+- [#149](https://github.com/VoltAgent/voltagent/pull/149) [`0137a4e`](https://github.com/VoltAgent/voltagent/commit/0137a4e67deaa2490b4a07f9de5f13633f2c473c) Thanks [@VenomHare](https://github.com/VenomHare)! - Added JSON schema support for REST API `generateObject` and `streamObject` functions. The system now accepts JSON schemas which are internally converted to Zod schemas for validation. This enables REST API usage where Zod schemas cannot be directly passed. #87
+
+  Additional Changes:
+
+  - Included the JSON schema from `options.schema` in the system message for the `generateObject` and `streamObject` functions in both `anthropic-ai` and `groq-ai` providers.
+  - Enhanced schema handling to convert JSON schemas to Zod internally for seamless REST API compatibility.
+
+- [#151](https://github.com/VoltAgent/voltagent/pull/151) [`4308b85`](https://github.com/VoltAgent/voltagent/commit/4308b857ab2133f6ca60f22271dcf30bad8b4c08) Thanks [@process.env.POSTGRES_USER](https://github.com/process.env.POSTGRES_USER)! - feat: Agent memory can now be stored in PostgreSQL database. This feature enables agents to persistently store conversation history in PostgreSQL. - #16
+
+  ## Usage
+
+  ```tsx
+  import { openai } from "@ai-sdk/openai";
+  import { Agent, VoltAgent } from "@voltagent/core";
+  import { PostgresStorage } from "@voltagent/postgres";
+  import { VercelAIProvider } from "@voltagent/vercel-ai";
+
+  // Configure PostgreSQL Memory Storage
+  const memoryStorage = new PostgresStorage({
+    // Read connection details from environment variables
+    connection: {
+      host: process.env.POSTGRES_HOST || "localhost",
+      port: Number.parseInt(process.env.POSTGRES_PORT || "5432"),
+      database: process.env.POSTGRES_DB || "voltagent",
+   || "postgres",
+      password: process.env.POSTGRES_PASSWORD || "password",
+      ssl: process.env.POSTGRES_SSL === "true",
+    },
+
+    // Alternative: Use connection string
+    // connection: process.env.DATABASE_URL || "postgresql://postgres:password@localhost:5432/voltagent",
+
+    // Optional: Customize table names
+    tablePrefix: "voltagent_memory",
+
+    // Optional: Configure connection pool
+    maxConnections: 10,
+
+    // Optional: Set storage limit for messages
+    storageLimit: 100,
+
+    // Optional: Enable debug logging for development
+    debug: process.env.NODE_ENV === "development",
+  });
+
+  // Create agent with PostgreSQL memory
+  const agent = new Agent({
+    name: "PostgreSQL Memory Agent",
+    description: "A helpful assistant that remembers conversations using PostgreSQL.",
+    llm: new VercelAIProvider(),
+    model: openai("gpt-4o-mini"),
+    memory: memoryStorage, // Use the configured PostgreSQL storage
+  });
+  ```
+
+## 0.1.21
+
+### Patch Changes
+
+- [#160](https://github.com/VoltAgent/voltagent/pull/160) [`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b) Thanks [@omeraplak](https://github.com/omeraplak)! - feat: improved event system architecture for better observability
+
+  We've updated the event system architecture to improve observability capabilities. The system includes automatic migrations to maintain backward compatibility, though some events may not display perfectly due to the architectural changes. Overall functionality remains stable and most features work as expected.
+
+  No action required - the system will automatically handle the migration process. If you encounter any issues, feel free to reach out on [Discord](https://s.voltagent.dev/discord) for support.
+
+  **What's Changed:**
+
+  - Enhanced event system for better observability and monitoring
+  - Automatic database migrations for seamless upgrades
+  - Improved agent history tracking and management
+
+  **Migration Notes:**
+
+  - Backward compatibility is maintained through automatic migrations
+  - Some legacy events may display differently but core functionality is preserved
+  - No manual intervention needed - migrations run automatically
+
+  **Note:**
+  Some events may not display perfectly due to architecture changes, but the system will automatically migrate and most functionality will work as expected.
+
+## 0.1.20
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- [#162](https://github.com/VoltAgent/voltagent/pull/162) [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af) Thanks [@omeraplak](https://github.com/omeraplak)! - fix: pin zod version to 3.24.2 to avoid "Type instantiation is excessively deep and possibly infinite" error
+
+  Fixed compatibility issues between different zod versions that were causing TypeScript compilation errors. This issue occurs when multiple packages use different patch versions of zod (e.g., 3.23.x vs 3.24.x), leading to type instantiation depth problems. By pinning to 3.24.2, we ensure consistent behavior across all packages.
+
+  See: https://github.com/colinhacks/zod/issues/3435
+
+- [#158](https://github.com/VoltAgent/voltagent/pull/158) [`9412cf0`](https://github.com/VoltAgent/voltagent/commit/9412cf0633f20d6b77c87625fc05e9e216936758) Thanks [@baseballyama](https://github.com/baseballyama)! - chore(core): fixed a type error that occurred in src/server/api.ts
+
+## 0.1.19
+
+### Patch Changes
+
+- [#128](https://github.com/VoltAgent/voltagent/pull/128) [`d6cf2e1`](https://github.com/VoltAgent/voltagent/commit/d6cf2e194d47352565314c93f1a4e477701563c1) Thanks [@omeraplak](https://github.com/omeraplak)! - feat: add VoltAgentExporter for production observability 🚀
+
+  VoltAgentExporter enables persistent storage and monitoring of AI agents in production environments:
+
+  - Send agent telemetry data to the VoltAgent cloud platform
+  - Access historical execution data through your project dashboard
+  - Monitor deployed agents over time
+  - Debug production issues with comprehensive tracing
+
+  To configure your project with VoltAgentExporter, visit the new tracing setup page at [`https://console.voltagent.dev/tracing-setup`](https://console.voltagent.dev/tracing-setup).
+
+  For more information about production tracing with VoltAgentExporter, see our [developer documentation](https://voltagent.dev/docs/observability/developer-console/#production-tracing-with-voltagentexporter).
+
 ## 0.1.18
 
 ### Patch Changes
@@ -649,6 +772,35 @@
 
 ## Package: @voltagent/anthropic-ai
 
+## 0.1.8
+
+### Patch Changes
+
+- [#149](https://github.com/VoltAgent/voltagent/pull/149) [`0137a4e`](https://github.com/VoltAgent/voltagent/commit/0137a4e67deaa2490b4a07f9de5f13633f2c473c) Thanks [@VenomHare](https://github.com/VenomHare)! - Added JSON schema support for REST API `generateObject` and `streamObject` functions. The system now accepts JSON schemas which are internally converted to Zod schemas for validation. This enables REST API usage where Zod schemas cannot be directly passed. #87
+
+  Additional Changes:
+
+  - Included the JSON schema from `options.schema` in the system message for the `generateObject` and `streamObject` functions in both `anthropic-ai` and `groq-ai` providers.
+  - Enhanced schema handling to convert JSON schemas to Zod internally for seamless REST API compatibility.
+
+- Updated dependencies [[`0137a4e`](https://github.com/VoltAgent/voltagent/commit/0137a4e67deaa2490b4a07f9de5f13633f2c473c), [`4308b85`](https://github.com/VoltAgent/voltagent/commit/4308b857ab2133f6ca60f22271dcf30bad8b4c08)]:
+  - @voltagent/core@0.1.22
+
+## 0.1.7
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- [#162](https://github.com/VoltAgent/voltagent/pull/162) [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af) Thanks [@omeraplak](https://github.com/omeraplak)! - fix: pin zod version to 3.24.2 to avoid "Type instantiation is excessively deep and possibly infinite" error
+
+  Fixed compatibility issues between different zod versions that were causing TypeScript compilation errors. This issue occurs when multiple packages use different patch versions of zod (e.g., 3.23.x vs 3.24.x), leading to type instantiation depth problems. By pinning to 3.24.2, we ensure consistent behavior across all packages.
+
+  See: https://github.com/colinhacks/zod/issues/3435
+
+- Updated dependencies [[`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c), [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af), [`9412cf0`](https://github.com/VoltAgent/voltagent/commit/9412cf0633f20d6b77c87625fc05e9e216936758)]:
+  - @voltagent/core@0.1.20
+
 ## 0.1.6
 
 ### Patch Changes
@@ -705,6 +857,12 @@
 ---
 
 ## Package: @voltagent/cli
+
+## 0.1.6
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
 
 ## 0.1.5
 
@@ -768,6 +926,18 @@
 
 ## Package: create-voltagent-app
 
+## 0.1.21
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- [#162](https://github.com/VoltAgent/voltagent/pull/162) [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af) Thanks [@omeraplak](https://github.com/omeraplak)! - fix: pin zod version to 3.24.2 to avoid "Type instantiation is excessively deep and possibly infinite" error
+
+  Fixed compatibility issues between different zod versions that were causing TypeScript compilation errors. This issue occurs when multiple packages use different patch versions of zod (e.g., 3.23.x vs 3.24.x), leading to type instantiation depth problems. By pinning to 3.24.2, we ensure consistent behavior across all packages.
+
+  See: https://github.com/colinhacks/zod/issues/3435
+
 ## 0.1.18
 
 ### Patch Changes
@@ -814,6 +984,61 @@
 ---
 
 ## Package: @voltagent/google-ai
+
+## 0.3.11
+
+### Patch Changes
+
+- [#160](https://github.com/VoltAgent/voltagent/pull/160) [`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b) Thanks [@omeraplak](https://github.com/omeraplak)! - refactor: remove peer dependencies and update package configuration
+
+  - Remove `@voltagent/core` peer dependency from Google AI and Groq AI packages
+  - Clean up package.json formatting and configuration
+  - Improve dependency management for better compatibility
+
+- Updated dependencies [[`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b)]:
+  - @voltagent/core@0.1.21
+
+## 0.3.10
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- [#162](https://github.com/VoltAgent/voltagent/pull/162) [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af) Thanks [@omeraplak](https://github.com/omeraplak)! - fix: pin zod version to 3.24.2 to avoid "Type instantiation is excessively deep and possibly infinite" error
+
+  Fixed compatibility issues between different zod versions that were causing TypeScript compilation errors. This issue occurs when multiple packages use different patch versions of zod (e.g., 3.23.x vs 3.24.x), leading to type instantiation depth problems. By pinning to 3.24.2, we ensure consistent behavior across all packages.
+
+  See: https://github.com/colinhacks/zod/issues/3435
+
+- Updated dependencies [[`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c), [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af), [`9412cf0`](https://github.com/VoltAgent/voltagent/commit/9412cf0633f20d6b77c87625fc05e9e216936758)]:
+  - @voltagent/core@0.1.20
+
+## 0.3.9
+
+### Patch Changes
+
+- [`85204e2`](https://github.com/VoltAgent/voltagent/commit/85204e24eea3a0aa5ad72038954302a182947fe0) Thanks [@omeraplak](https://github.com/omeraplak)! - feat: add provider options support including thinkingConfig - #138
+
+  ```typescript
+  const response = await agent.generateText("Write a creative story.", {
+    provider: {
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
+    },
+  });
+  ```
+
+## 0.3.8
+
+### Patch Changes
+
+- [#122](https://github.com/VoltAgent/voltagent/pull/122) [`de83eaf`](https://github.com/VoltAgent/voltagent/commit/de83eaf76af5b88fb4303ff60fd8af36369fda63) Thanks [@luixaviles](https://github.com/luixaviles)! - feat(google-ai): include tool calls and results in generateText response
+
+  Fixes #115
+
+- Updated dependencies [[`d6cf2e1`](https://github.com/VoltAgent/voltagent/commit/d6cf2e194d47352565314c93f1a4e477701563c1)]:
+  - @voltagent/core@0.1.19
 
 ## 0.3.7
 
@@ -934,6 +1159,48 @@
 
 ## Package: @voltagent/groq-ai
 
+## 0.1.10
+
+### Patch Changes
+
+- [#149](https://github.com/VoltAgent/voltagent/pull/149) [`0137a4e`](https://github.com/VoltAgent/voltagent/commit/0137a4e67deaa2490b4a07f9de5f13633f2c473c) Thanks [@VenomHare](https://github.com/VenomHare)! - Added JSON schema support for REST API `generateObject` and `streamObject` functions. The system now accepts JSON schemas which are internally converted to Zod schemas for validation. This enables REST API usage where Zod schemas cannot be directly passed. #87
+
+  Additional Changes:
+
+  - Included the JSON schema from `options.schema` in the system message for the `generateObject` and `streamObject` functions in both `anthropic-ai` and `groq-ai` providers.
+  - Enhanced schema handling to convert JSON schemas to Zod internally for seamless REST API compatibility.
+
+- Updated dependencies [[`0137a4e`](https://github.com/VoltAgent/voltagent/commit/0137a4e67deaa2490b4a07f9de5f13633f2c473c), [`4308b85`](https://github.com/VoltAgent/voltagent/commit/4308b857ab2133f6ca60f22271dcf30bad8b4c08)]:
+  - @voltagent/core@0.1.22
+
+## 0.1.9
+
+### Patch Changes
+
+- [#160](https://github.com/VoltAgent/voltagent/pull/160) [`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b) Thanks [@omeraplak](https://github.com/omeraplak)! - refactor: remove peer dependencies and update package configuration
+
+  - Remove `@voltagent/core` peer dependency from Google AI and Groq AI packages
+  - Clean up package.json formatting and configuration
+  - Improve dependency management for better compatibility
+
+- Updated dependencies [[`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b)]:
+  - @voltagent/core@0.1.21
+
+## 0.1.8
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- [#162](https://github.com/VoltAgent/voltagent/pull/162) [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af) Thanks [@omeraplak](https://github.com/omeraplak)! - fix: pin zod version to 3.24.2 to avoid "Type instantiation is excessively deep and possibly infinite" error
+
+  Fixed compatibility issues between different zod versions that were causing TypeScript compilation errors. This issue occurs when multiple packages use different patch versions of zod (e.g., 3.23.x vs 3.24.x), leading to type instantiation depth problems. By pinning to 3.24.2, we ensure consistent behavior across all packages.
+
+  See: https://github.com/colinhacks/zod/issues/3435
+
+- Updated dependencies [[`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c), [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af), [`9412cf0`](https://github.com/VoltAgent/voltagent/commit/9412cf0633f20d6b77c87625fc05e9e216936758)]:
+  - @voltagent/core@0.1.20
+
 ## 0.1.7
 
 ### Patch Changes
@@ -1051,6 +1318,15 @@
 
 ## Package: @voltagent/langfuse-exporter
 
+## 0.1.3
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- Updated dependencies [[`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c), [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af), [`9412cf0`](https://github.com/VoltAgent/voltagent/commit/9412cf0633f20d6b77c87625fc05e9e216936758)]:
+  - @voltagent/core@0.1.20
+
 ## 0.1.2
 
 ### Patch Changes
@@ -1145,7 +1421,70 @@
 
 ---
 
+## Package: @voltagent/sdk
+
+## 0.1.3
+
+### Patch Changes
+
+- [#171](https://github.com/VoltAgent/voltagent/pull/171) [`1cd2a93`](https://github.com/VoltAgent/voltagent/commit/1cd2a9307d10bf5c90083138655aca9614d8053b) Thanks [@omeraplak](https://github.com/omeraplak)! - feat: initial release of Vercel AI SDK integration
+
+  Add support for Vercel AI SDK observability with automated tracing and monitoring capabilities.
+
+  Documentation: https://voltagent.dev/docs-observability/vercel-ai/
+
+## 0.1.1
+
+### Patch Changes
+
+- [#160](https://github.com/VoltAgent/voltagent/pull/160) [`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b) Thanks [@omeraplak](https://github.com/omeraplak)! - feat: introduce new VoltAgent SDK package
+
+  - Add new `@voltagent/sdk` package for client-side interactions with VoltAgent API
+  - Includes VoltAgentClient for managing agents, conversations, and telemetry
+  - Provides wrapper utilities for enhanced agent functionality
+  - Supports TypeScript with complete type definitions
+
+- Updated dependencies [[`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b)]:
+  - @voltagent/core@0.1.21
+
+---
+
 ## Package: @voltagent/supabase
+
+## 0.1.6
+
+### Patch Changes
+
+- [#160](https://github.com/VoltAgent/voltagent/pull/160) [`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b) Thanks [@omeraplak](https://github.com/omeraplak)! - feat: enhanced Supabase memory provider with better performance
+
+  We've significantly improved the Supabase memory provider with better schema design and enhanced performance capabilities. The update includes database schema changes that require migration.
+
+  Migration commands will appear in your terminal - follow those instructions to apply the database changes. If you experience any issues with the migration or memory operations, please reach out on [Discord](https://s.voltagent.dev/discord) for assistance.
+
+  **What's Improved:**
+
+  - Better performance for memory operations and large datasets
+  - Enhanced database schema with optimized indexing
+  - Improved error handling and data validation
+  - Better support for timeline events and metadata storage
+
+  **Migration Notes:**
+
+  - Migration commands will be displayed in your terminal
+  - Follow the terminal instructions to update your database schema
+  - Existing memory data will be preserved during the migration
+
+- Updated dependencies [[`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b)]:
+  - @voltagent/core@0.1.21
+
+## 0.1.5
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- Updated dependencies [[`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c), [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af), [`9412cf0`](https://github.com/VoltAgent/voltagent/commit/9412cf0633f20d6b77c87625fc05e9e216936758)]:
+  - @voltagent/core@0.1.20
 
 ## 0.1.4
 
@@ -1234,6 +1573,21 @@
 ---
 
 ## Package: @voltagent/vercel-ai
+
+## 0.1.9
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- [#162](https://github.com/VoltAgent/voltagent/pull/162) [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af) Thanks [@omeraplak](https://github.com/omeraplak)! - fix: pin zod version to 3.24.2 to avoid "Type instantiation is excessively deep and possibly infinite" error
+
+  Fixed compatibility issues between different zod versions that were causing TypeScript compilation errors. This issue occurs when multiple packages use different patch versions of zod (e.g., 3.23.x vs 3.24.x), leading to type instantiation depth problems. By pinning to 3.24.2, we ensure consistent behavior across all packages.
+
+  See: https://github.com/colinhacks/zod/issues/3435
+
+- Updated dependencies [[`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c), [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af), [`9412cf0`](https://github.com/VoltAgent/voltagent/commit/9412cf0633f20d6b77c87625fc05e9e216936758)]:
+  - @voltagent/core@0.1.20
 
 ## 0.1.7
 
@@ -1354,7 +1708,48 @@
 
 ---
 
+## Package: @voltagent/vercel-ai-exporter
+
+## 0.1.2
+
+### Patch Changes
+
+- [#171](https://github.com/VoltAgent/voltagent/pull/171) [`1cd2a93`](https://github.com/VoltAgent/voltagent/commit/1cd2a9307d10bf5c90083138655aca9614d8053b) Thanks [@omeraplak](https://github.com/omeraplak)! - feat: initial release of Vercel AI SDK integration
+
+  Add support for Vercel AI SDK observability with automated tracing and monitoring capabilities.
+
+  Documentation: https://voltagent.dev/docs-observability/vercel-ai/
+
+- Updated dependencies [[`1cd2a93`](https://github.com/VoltAgent/voltagent/commit/1cd2a9307d10bf5c90083138655aca9614d8053b)]:
+  - @voltagent/sdk@0.1.3
+
+## 0.1.1
+
+### Patch Changes
+
+- [#160](https://github.com/VoltAgent/voltagent/pull/160) [`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b) Thanks [@omeraplak](https://github.com/omeraplak)! - feat: add Vercel AI SDK observability exporter
+
+  - Introduce new `@voltagent/vercel-ai-exporter` package for Vercel AI SDK integration
+  - Provides OpenTelemetry exporter for VoltAgent observability
+  - Enables comprehensive tracking of LLM operations and multi-agent workflows
+  - Includes automatic telemetry collection and agent history management
+
+- Updated dependencies [[`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b), [`03ed437`](https://github.com/VoltAgent/voltagent/commit/03ed43723cd56f29ac67088f0624a88632a14a1b)]:
+  - @voltagent/core@0.1.21
+  - @voltagent/sdk@0.1.1
+
+---
+
 ## Package: @voltagent/voice
+
+## 0.1.7
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- Updated dependencies [[`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c), [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af), [`9412cf0`](https://github.com/VoltAgent/voltagent/commit/9412cf0633f20d6b77c87625fc05e9e216936758)]:
+  - @voltagent/core@0.1.20
 
 ## 0.1.6
 
@@ -1441,6 +1836,27 @@
 ---
 
 ## Package: @voltagent/xsai
+
+## 0.1.9
+
+### Patch Changes
+
+- [#155](https://github.com/VoltAgent/voltagent/pull/155) [`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c) Thanks [@baseballyama](https://github.com/baseballyama)! - chore: update `tsconfig.json`'s `target` to `ES2022`
+
+- [#162](https://github.com/VoltAgent/voltagent/pull/162) [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af) Thanks [@omeraplak](https://github.com/omeraplak)! - fix: pin zod version to 3.24.2 to avoid "Type instantiation is excessively deep and possibly infinite" error
+
+  Fixed compatibility issues between different zod versions that were causing TypeScript compilation errors. This issue occurs when multiple packages use different patch versions of zod (e.g., 3.23.x vs 3.24.x), leading to type instantiation depth problems. By pinning to 3.24.2, we ensure consistent behavior across all packages.
+
+  See: https://github.com/colinhacks/zod/issues/3435
+
+- Updated dependencies [[`35b11f5`](https://github.com/VoltAgent/voltagent/commit/35b11f5258073dd39f3032db6d9b29146f4b940c), [`b164bd0`](https://github.com/VoltAgent/voltagent/commit/b164bd014670452cb162b388f03565db992767af), [`9412cf0`](https://github.com/VoltAgent/voltagent/commit/9412cf0633f20d6b77c87625fc05e9e216936758)]:
+  - @voltagent/core@0.1.20
+
+## 0.1.8
+
+### Patch Changes
+
+- [#100](https://github.com/VoltAgent/voltagent/pull/100) [`0bdcf94`](https://github.com/VoltAgent/voltagent/commit/0bdcf9441cc79cf6321b377c303123d28daddda4) Thanks [@kwaa](https://github.com/kwaa)! - feat: Add multi-modal support (see [docs](https://voltagent.dev/docs/providers/xsai/#multi-modal-support)) - [#79](https://github.com/VoltAgent/voltagent/issues/79)
 
 ## 0.1.6
 

@@ -15,6 +15,7 @@ export * from "./tool";
 export * from "./tool/reasoning/index";
 export * from "./memory";
 export * from "./agent/providers";
+export * from "./events/types";
 export type {
   AgentOptions,
   AgentResponse,
@@ -28,7 +29,7 @@ export type {
   StreamObjectOnFinishCallback,
   ToolErrorInfo,
 } from "./agent/types";
-export type { AgentHistoryEntry } from "./agent/history";
+export type { AgentHistoryEntry, HistoryStatus } from "./agent/history";
 export type { AgentHooks } from "./agent/hooks";
 export * from "./types";
 export * from "./utils";
@@ -44,6 +45,7 @@ export {
   CustomEndpointError,
 } from "./server/custom-endpoints";
 export * from "./telemetry/exporter";
+export type { UsageInfo } from "./agent/providers";
 
 let isTelemetryInitializedByVoltAgent = false;
 let registeredProvider: NodeTracerProvider | null = null;
