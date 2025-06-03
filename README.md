@@ -108,7 +108,7 @@ const agent = new Agent({
   model: openai("gpt-4o-mini"),
 });
 
-// Initialize VoltAgent with your agent(s) and custom endpoints
+// Initialize VoltAgent with your agent(s)
 new VoltAgent({
   agents: {
     agent,
