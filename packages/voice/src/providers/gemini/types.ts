@@ -5,7 +5,7 @@ import type { BaseVoiceProviderOptions } from "../base/types";
  */
 export const GEMINI_VOICES = [
   "Zephyr",
-  "Puck", 
+  "Puck",
   "Charon",
   "Kore",
   "Fenrir",
@@ -88,7 +88,7 @@ export type GeminiSpeakerConfig = {
    * Speaker name (must match the name used in the prompt)
    */
   speaker: string;
-  
+
   /**
    * Voice to use for this speaker
    */
@@ -115,12 +115,6 @@ export type GeminiVoiceOptions = BaseVoiceProviderOptions & {
    * @default "Kore"
    */
   voice?: GeminiVoice;
-
-  /**
-   * Base URL for the Gemini API
-   * @default "https://generativelanguage.googleapis.com"
-   */
-  baseURL?: string;
 
   /**
    * Additional Gemini API options

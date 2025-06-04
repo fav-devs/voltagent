@@ -10,62 +10,239 @@ import type {
   GeminiSpeakerConfig,
   GeminiTTSModel,
 } from "./types";
-import { GEMINI_VOICES, GEMINI_TTS_MODELS } from "./types";
+import { GEMINI_VOICES } from "./types";
 
 // Voice metadata mapping with characteristics
 const VOICE_METADATA: Record<GeminiVoice, VoiceMetadata> = {
-  Zephyr: { id: "Zephyr", name: "Zephyr", language: "en", gender: "neutral", metadata: { style: "bright" } },
-  Puck: { id: "Puck", name: "Puck", language: "en", gender: "neutral", metadata: { style: "upbeat" } },
-  Charon: { id: "Charon", name: "Charon", language: "en", gender: "neutral", metadata: { style: "informative" } },
-  Kore: { id: "Kore", name: "Kore", language: "en", gender: "neutral", metadata: { style: "firm" } },
-  Fenrir: { id: "Fenrir", name: "Fenrir", language: "en", gender: "neutral", metadata: { style: "exciting" } },
-  Leda: { id: "Leda", name: "Leda", language: "en", gender: "neutral", metadata: { style: "youthful" } },
-  Orus: { id: "Orus", name: "Orus", language: "en", gender: "neutral", metadata: { style: "firm" } },
-  Aoede: { id: "Aoede", name: "Aoede", language: "en", gender: "neutral", metadata: { style: "breezy" } },
-  Callirrhoe: { id: "Callirrhoe", name: "Callirrhoe", language: "en", gender: "neutral", metadata: { style: "easygoing" } },
-  Autonoe: { id: "Autonoe", name: "Autonoe", language: "en", gender: "neutral", metadata: { style: "bright" } },
-  Enceladus: { id: "Enceladus", name: "Enceladus", language: "en", gender: "neutral", metadata: { style: "breathy" } },
-  Iapetus: { id: "Iapetus", name: "Iapetus", language: "en", gender: "neutral", metadata: { style: "clear" } },
-  Umbriel: { id: "Umbriel", name: "Umbriel", language: "en", gender: "neutral", metadata: { style: "easygoing" } },
-  Algieba: { id: "Algieba", name: "Algieba", language: "en", gender: "neutral", metadata: { style: "smooth" } },
-  Despina: { id: "Despina", name: "Despina", language: "en", gender: "neutral", metadata: { style: "smooth" } },
-  Erinome: { id: "Erinome", name: "Erinome", language: "en", gender: "neutral", metadata: { style: "clear" } },
-  Algenib: { id: "Algenib", name: "Algenib", language: "en", gender: "neutral", metadata: { style: "gravelly" } },
-  Rasalgethi: { id: "Rasalgethi", name: "Rasalgethi", language: "en", gender: "neutral", metadata: { style: "informative" } },
-  Laomedeia: { id: "Laomedeia", name: "Laomedeia", language: "en", gender: "neutral", metadata: { style: "upbeat" } },
-  Achernar: { id: "Achernar", name: "Achernar", language: "en", gender: "neutral", metadata: { style: "soft" } },
-  Alnilam: { id: "Alnilam", name: "Alnilam", language: "en", gender: "neutral", metadata: { style: "firm" } },
-  Schedar: { id: "Schedar", name: "Schedar", language: "en", gender: "neutral", metadata: { style: "even" } },
-  Gacrux: { id: "Gacrux", name: "Gacrux", language: "en", gender: "neutral", metadata: { style: "mature" } },
-  Pulcherrima: { id: "Pulcherrima", name: "Pulcherrima", language: "en", gender: "neutral", metadata: { style: "forward" } },
-  Achird: { id: "Achird", name: "Achird", language: "en", gender: "neutral", metadata: { style: "friendly" } },
-  Zubenelgenubi: { id: "Zubenelgenubi", name: "Zubenelgenubi", language: "en", gender: "neutral", metadata: { style: "casual" } },
-  Vindemiatrix: { id: "Vindemiatrix", name: "Vindemiatrix", language: "en", gender: "neutral", metadata: { style: "gentle" } },
-  Sadachbia: { id: "Sadachbia", name: "Sadachbia", language: "en", gender: "neutral", metadata: { style: "lively" } },
-  Sadaltager: { id: "Sadaltager", name: "Sadaltager", language: "en", gender: "neutral", metadata: { style: "wise" } },
-  Sulafat: { id: "Sulafat", name: "Sulafat", language: "en", gender: "neutral", metadata: { style: "warm" } },
+  Zephyr: {
+    id: "Zephyr",
+    name: "Zephyr",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "bright" },
+  },
+  Puck: {
+    id: "Puck",
+    name: "Puck",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "upbeat" },
+  },
+  Charon: {
+    id: "Charon",
+    name: "Charon",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "informative" },
+  },
+  Kore: {
+    id: "Kore",
+    name: "Kore",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "firm" },
+  },
+  Fenrir: {
+    id: "Fenrir",
+    name: "Fenrir",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "exciting" },
+  },
+  Leda: {
+    id: "Leda",
+    name: "Leda",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "youthful" },
+  },
+  Orus: {
+    id: "Orus",
+    name: "Orus",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "firm" },
+  },
+  Aoede: {
+    id: "Aoede",
+    name: "Aoede",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "breezy" },
+  },
+  Callirrhoe: {
+    id: "Callirrhoe",
+    name: "Callirrhoe",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "easygoing" },
+  },
+  Autonoe: {
+    id: "Autonoe",
+    name: "Autonoe",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "bright" },
+  },
+  Enceladus: {
+    id: "Enceladus",
+    name: "Enceladus",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "breathy" },
+  },
+  Iapetus: {
+    id: "Iapetus",
+    name: "Iapetus",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "clear" },
+  },
+  Umbriel: {
+    id: "Umbriel",
+    name: "Umbriel",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "easygoing" },
+  },
+  Algieba: {
+    id: "Algieba",
+    name: "Algieba",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "smooth" },
+  },
+  Despina: {
+    id: "Despina",
+    name: "Despina",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "smooth" },
+  },
+  Erinome: {
+    id: "Erinome",
+    name: "Erinome",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "clear" },
+  },
+  Algenib: {
+    id: "Algenib",
+    name: "Algenib",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "gravelly" },
+  },
+  Rasalgethi: {
+    id: "Rasalgethi",
+    name: "Rasalgethi",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "informative" },
+  },
+  Laomedeia: {
+    id: "Laomedeia",
+    name: "Laomedeia",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "upbeat" },
+  },
+  Achernar: {
+    id: "Achernar",
+    name: "Achernar",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "soft" },
+  },
+  Alnilam: {
+    id: "Alnilam",
+    name: "Alnilam",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "firm" },
+  },
+  Schedar: {
+    id: "Schedar",
+    name: "Schedar",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "even" },
+  },
+  Gacrux: {
+    id: "Gacrux",
+    name: "Gacrux",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "mature" },
+  },
+  Pulcherrima: {
+    id: "Pulcherrima",
+    name: "Pulcherrima",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "forward" },
+  },
+  Achird: {
+    id: "Achird",
+    name: "Achird",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "friendly" },
+  },
+  Zubenelgenubi: {
+    id: "Zubenelgenubi",
+    name: "Zubenelgenubi",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "casual" },
+  },
+  Vindemiatrix: {
+    id: "Vindemiatrix",
+    name: "Vindemiatrix",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "gentle" },
+  },
+  Sadachbia: {
+    id: "Sadachbia",
+    name: "Sadachbia",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "lively" },
+  },
+  Sadaltager: {
+    id: "Sadaltager",
+    name: "Sadaltager",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "wise" },
+  },
+  Sulafat: {
+    id: "Sulafat",
+    name: "Sulafat",
+    language: "en",
+    gender: "neutral",
+    metadata: { style: "warm" },
+  },
 };
 
 export class GeminiVoiceProvider extends BaseVoiceProvider {
   private readonly client: GoogleGenAI;
   private readonly model: GeminiTTSModel;
   private readonly voice: GeminiVoice;
-  private readonly baseURL: string;
 
   constructor(options: GeminiVoiceOptions) {
     super(options);
-    
+
     if (!options.apiKey) {
       throw new Error("Gemini API key is required");
     }
 
     this.model = options.model || "gemini-2.5-flash-preview-tts";
     this.voice = options.voice || "Kore";
-    this.baseURL = options.baseURL || "https://generativelanguage.googleapis.com";
 
     this.client = new GoogleGenAI({
       apiKey: options.apiKey,
-      baseURL: this.baseURL,
     });
   }
 
@@ -108,9 +285,9 @@ export class GeminiVoiceProvider extends BaseVoiceProvider {
 
       // Determine if this is multi-speaker or single-speaker
       const isMultiSpeaker = options?.speakers && options.speakers.length > 0;
-      
+
       let speechConfig: any;
-      
+
       if (isMultiSpeaker) {
         // Multi-speaker configuration
         speechConfig = {
@@ -149,7 +326,7 @@ export class GeminiVoiceProvider extends BaseVoiceProvider {
 
       // Extract audio data from response
       const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      
+
       if (!audioData) {
         throw new Error("No audio data received from Gemini API");
       }
@@ -158,7 +335,7 @@ export class GeminiVoiceProvider extends BaseVoiceProvider {
       const audioBuffer = Buffer.from(audioData, "base64");
       const passThrough = new PassThrough();
       passThrough.end(audioBuffer);
-      
+
       return passThrough;
     } catch (error) {
       this.emit("error", {
@@ -175,13 +352,15 @@ export class GeminiVoiceProvider extends BaseVoiceProvider {
    */
   async listen(
     audio: NodeJS.ReadableStream,
-    options?: GeminiListenOptions,
+    _options?: GeminiListenOptions,
   ): Promise<string | ReadableStreamType> {
     // Emit listening event
     this.emit("listening", { audio });
 
     // Gemini TTS models don't support speech-to-text
-    throw new Error("Speech-to-text is not supported by Gemini TTS models. Use a dedicated STT model instead.");
+    throw new Error(
+      "Speech-to-text is not supported by Gemini TTS models. Use a dedicated STT model instead.",
+    );
   }
 
   /**
